@@ -7,31 +7,11 @@ const app = express();
 
 app.use(express.json());
 
-// app.get('/', (req, res) => {
-//   res.status(200).json({ message: 'Hello from the server!', app: 'natours' });
-// });
-
-// app.post('/', (req, res) => {
-//   res.send('You can POST to this endpoint...');
-// });
-
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
 
-app.get('/api/v1/tours', (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    results: tours.length,
-    data: {
-      tours: tours,
-    },
-  });
-});
-
-app.post('/api/v1/tours', (req, res) => {
-  // console.log(req.body);
-
+const createTour = (req, res) => {
   const newId = tours[tours.length - 1].id + 1;
   const newTour = Object.assign({ id: newId }, req.body);
 
@@ -49,7 +29,68 @@ app.post('/api/v1/tours', (req, res) => {
       });
     }
   );
-});
+};
+
+const getAllTours = (req, res) => {
+  console.log(req.params);
+
+  const id = req.params.id * 1;
+  const tour = tours.find((el) => el.id === id);
+
+  if (!tour) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'INVALID ID',
+    });
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      tour,
+    },
+  });
+};
+
+const getTour = (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    results: tours.length,
+    data: {
+      tours: tours,
+    },
+  });
+};
+
+const updateTour = (req, res) => {
+  if (req.params.id * 1 > tours.length) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'INVALID ID',
+    });
+  }
+
+  res.status(200).json({
+    status: 'success',
+    message: '<updated tour here...>',
+  });
+};
+
+const deleteTour = (req, res) => {
+  if (req.params.id > tours.length) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'INVALID ID',
+    });
+  }
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+};
+
+app.route('/api/v1/tours').post(createTour).get(getAllTours);
+app.route('/api/v1/tours/:id').get(getTour).post(updateTour).delete(deleteTour);
 
 const port = 3000;
 

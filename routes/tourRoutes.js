@@ -4,6 +4,7 @@ const router = express.Router();
 
 router.param('id', tourController.checkID);
 // router.param('body', );
+console.log('is this being pushed?');
 
 router
   .route('/')
